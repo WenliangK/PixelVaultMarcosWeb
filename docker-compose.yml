@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # 1. Contenedor de la Base de Datos PostgreSQL
+  db:
+    image: postgres:15
+    container_name: pixelvault-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin # <-- Pon la misma clave que usas en tu app
+      POSTGRES_DB: pixelvault_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # 2. Contenedor de tu Servidor Backend (Spring Boot)
+  backend:
+    build: 
+      context: ./backend
+    container_name: pixelvault-backend
+    ports:
+      - "8080:8080" # Expone el puerto del servidor
+    depends_on:
+      - db
+    environment:
+      # Sobreescribe las variables para que apunte al contenedor de DB
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pixelvault_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+
+volumes:
+  pgdata: # Este volumen hace que tus datos no se borren si apagas el contenedor
