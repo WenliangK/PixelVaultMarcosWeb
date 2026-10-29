@@ -13,6 +13,27 @@ Corresponde a la Alternativa 1 seleccionada en el informe APF1.
 
 ---
 
+## 0. Arranque rápido con Docker (base + backend + frontend)
+
+```bash
+cp .env.example .env      # en Windows: copy .env.example .env  (y edita las claves)
+docker-compose up --build -d
+```
+
+- Frontend: http://localhost (Nginx) · API: http://localhost:8080/api/juegos
+- La base espera a estar `healthy` (pg_isready) antes de arrancar el backend.
+- Sin archivo `.env` se usan los valores por defecto (`admin` y el secreto JWT de desarrollo).
+
+## Pruebas e integración continua
+
+```bash
+cd backend
+mvn test        # 18 pruebas JUnit 5 + Mockito (compras, cupones, usuarios y validación de DTO)
+```
+
+`.github/workflows/ci.yml` (GitHub Actions) ejecuta `mvn verify` en cada push y Pull Request a `main`,
+y construye la imagen Docker del backend; solo desde `main` la publica en GitHub Container Registry.
+
 ## 1. Requisitos previos
 
 - **Java 17** o superior (`java -version`)

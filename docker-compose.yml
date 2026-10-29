@@ -1,31 +1,49 @@
+# Orquestación de PixelVault: base de datos + backend + frontend (propuesta APF3).
+# Las credenciales se leen del archivo .env (ver .env.example); no se suben al repositorio.
 services:
-  # 1. Contenedor de la Base de Datos PostgreSQL
   db:
     image: postgres:15
     container_name: pixelvault-db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin # <-- Pon la misma clave que usas en tu app
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
       POSTGRES_DB: pixelvault_db
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pixelvault_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
 
-  # 2. Contenedor de tu Servidor Backend (Spring Boot)
   backend:
-    build: 
+    build:
       context: ./backend
     container_name: pixelvault-backend
     ports:
-      - "8080:8080" # Expone el puerto del servidor
+      - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      # Sobreescribe las variables para que apunte al contenedor de DB
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pixelvault_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=admin
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/pixelvault_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-admin}
+      PIXELVAULT_JWT_SECRET: ${PIXELVAULT_JWT_SECRET:-pixelvault-secret-key-cambiar-en-produccion-2026}
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./Frontend
+    container_name: pixelvault-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
 
 volumes:
-  pgdata: # Este volumen hace que tus datos no se borren si apagas el contenedor
+  pgdata:
