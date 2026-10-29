@@ -26,11 +26,13 @@ Crea la base de datos vacía (las tablas las genera Spring Boot / Hibernate auto
 gracias a `spring.jpa.hibernate.ddl-auto=update`):
 
 ```sql
-CREATE DATABASE pixelvault;
+CREATE DATABASE pixelvault_db;
 ```
 
 Edita `backend/src/main/resources/application.properties` si tu usuario/clave/host de
-PostgreSQL son distintos a los valores por defecto (`postgres` / `postgres` / `localhost:5432`).
+PostgreSQL son distintos a los valores por defecto (`postgres` / `admin` / `localhost:5432`, BD `pixelvault_db`).
+
+> Alternativa sin instalar PostgreSQL: `docker-compose up -d db` levanta solo la base de datos con esos mismos valores.
 
 ## 3. Levantar el backend (Java / Spring Boot)
 
@@ -53,12 +55,12 @@ Debe devolver el listado de juegos en JSON.
 
 ## 4. Abrir el frontend
 
-No necesita servidor propio: abre `frontend/index.html` directamente en el navegador
+No necesita servidor propio: abre `Frontend/index.html` directamente en el navegador
 (doble clic, o clic derecho → "Abrir con..."), o sírvelo con cualquier servidor estático,
 por ejemplo:
 
 ```bash
-cd frontend
+cd Frontend
 npx serve .
 ```
 
